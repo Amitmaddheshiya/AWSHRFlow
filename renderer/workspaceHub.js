@@ -533,6 +533,8 @@
               <tr><td>CTC</td><td>${formatCurrency(employee.ctc)}</td></tr>
               <tr><td>PF Default</td><td>${formatCurrency(company?.defaultPfAmount || 0)}</td></tr>
               <tr><td>PT Default</td><td>${formatCurrency(company?.defaultPtAmount || 0)}</td></tr>
+              <tr><td>Salary Basis</td><td>${escapeHtml(company?.salaryCalculationBase === 'full-month' ? 'Full Month' : `${company?.salaryCalculationBase || 'Full Month'} Days`)}</td></tr>
+              <tr><td>TDS Rule</td><td>${escapeHtml(company?.tdsRule ? 'Company Custom' : 'Default Logic')}</td></tr>
             </table>
             <div class="workspace-action-row"><button type="button" class="primary-btn" data-open-page="payslip">Open Payslip Generator</button></div>
           </div>

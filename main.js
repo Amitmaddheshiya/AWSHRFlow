@@ -28,9 +28,17 @@ async function exportHtmlToPdf({
     show: false,
     webPreferences: { offscreen: true }
   });
+  const tempDir = path.join(app.getPath('userData'), 'pdf-render-cache');
+  const tempFileName = `${Date.now()}_${Math.random().toString(16).slice(2)}.html`;
+  const tempHtmlPath = path.join(tempDir, tempFileName);
 
   try {
-    await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+
+    fs.writeFileSync(tempHtmlPath, html, 'utf8');
+    await win.loadFile(tempHtmlPath);
 
     const pdfBuffer = await win.webContents.printToPDF({
       printBackground: true,
@@ -68,6 +76,9 @@ async function exportHtmlToPdf({
       filePath: targetPath
     };
   } finally {
+    if (fs.existsSync(tempHtmlPath)) {
+      fs.unlinkSync(tempHtmlPath);
+    }
     win.close();
   }
 }
@@ -145,7 +156,7 @@ ipcMain.handle('generate-hr-document-pdf', async (event, data) => {
     html: data.html,
     defaultFileName: data.fileName,
     subdirectory: 'HR Documents',
-    askForPath: true
+    askForPath: false
   });
 });
 
@@ -154,6 +165,6 @@ ipcMain.handle('generate-id-card-pdf', async (event, data) => {
     html: data.html,
     defaultFileName: data.fileName,
     subdirectory: 'ID Cards',
-    askForPath: true
+    askForPath: false
   });
 });

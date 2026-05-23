@@ -14,8 +14,20 @@ let editingPolicyId = null;
 let selectedPolicyCompanyId = null;
 let employeeSaveInProgress = false;
 const MAX_CUSTOM_FIELDS = 4;
+const DEFAULT_TDS_SLAB_PLACEHOLDERS = [
+  { from: '0', to: '400000', percent: '0' },
+  { from: '400001', to: '800000', percent: '5' },
+  { from: '800001', to: '1200000', percent: '10' },
+  { from: '1200001', to: '1600000', percent: '15' },
+  { from: '1600001', to: '2000000', percent: '20' },
+  { from: '2000001', to: '2400000', percent: '25' },
+  { from: '2400001', to: '', percent: '30' }
+];
 let employeeCustomFieldsState = [];
 let companyCustomFieldsState = [];
+let companyTdsSlabsState = [];
+let companyTdsRuleOriginal = '';
+let companyTdsConfigTouched = false;
 
 const state = {
   companies: [],
@@ -48,8 +60,10 @@ const refreshAppBtn = document.getElementById('refreshAppBtn');
 const employeeFormMessage = document.getElementById('employeeFormMessage');
 const addEmployeeFieldBtn = document.getElementById('addEmployeeFieldBtn');
 const addCompanyFieldBtn = document.getElementById('addCompanyFieldBtn');
+const addTdsSlabBtn = document.getElementById('addTdsSlabBtn');
 const employeeCustomFieldsWrap = document.getElementById('employeeCustomFields');
 const companyCustomFieldsWrap = document.getElementById('companyCustomFields');
+const tdsSlabRowsWrap = document.getElementById('tdsSlabRows');
 const appAuthOverlay = document.getElementById('appAuthOverlay');
 const appAuthForm = document.getElementById('appAuthForm');
 const appPasswordInput = document.getElementById('appPasswordInput');
@@ -112,6 +126,7 @@ const companyFields = {
   bankAccountNumber: document.getElementById('companyBankAccountNumber'),
   ifsc: document.getElementById('companyIfsc'),
   paymentMode: document.getElementById('companyPaymentMode'),
+  salaryCalculationBase: document.getElementById('salaryCalculationBase'),
   defaultPfAmount: document.getElementById('defaultPfAmount'),
   defaultPtAmount: document.getElementById('defaultPtAmount'),
   defaultPfEnabled: document.getElementById('defaultPfEnabled'),
@@ -120,6 +135,9 @@ const companyFields = {
   stampData: document.getElementById('companyStamp'),
   signatureData: document.getElementById('companySignature'),
   payslipNote: document.getElementById('companyPayslipNote'),
+  tdsStandardDeduction: document.getElementById('tdsStandardDeduction'),
+  tdsRebateLimit: document.getElementById('tdsRebateLimit'),
+  tdsCessPercent: document.getElementById('tdsCessPercent'),
   documentFooter: document.getElementById('companyDocumentFooter')
 };
 
@@ -164,6 +182,7 @@ const payslipInputs = {
   yearSelect: document.getElementById('yearSelect'),
   attendance: document.getElementById('attendance'),
   extraAllowance: document.getElementById('extraAllowance'),
+  loanOtherDeduction: document.getElementById('loanOtherDeduction'),
   tdsOverride: document.getElementById('tdsOverride')
 };
 
@@ -205,10 +224,12 @@ const payslipPreviewEls = {
   dPf: document.getElementById('dPf'),
   dPt: document.getElementById('dPt'),
   dTds: document.getElementById('dTds'),
+  dLoanOther: document.getElementById('dLoanOther'),
   dTotal: document.getElementById('dTotal'),
   aTotal: document.getElementById('aTotal'),
   aPresent: document.getElementById('aPresent'),
   aAbsent: document.getElementById('aAbsent'),
+  aSalaryBasis: document.getElementById('aSalaryBasis'),
   pBank: document.getElementById('pBank'),
   pAcc: document.getElementById('pAcc'),
   pIfsc: document.getElementById('pIfsc'),
@@ -224,6 +245,19 @@ const payslipPreviewEls = {
 
 function numberValue(value) {
   return Number(value) || 0;
+}
+
+function moneyValue(value) {
+  return Math.max(0, numberValue(value));
+}
+
+function formatDays(value) {
+  const rounded = Math.round(numberValue(value) * 100) / 100;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+}
+
+function daysLabel(value) {
+  return `${formatDays(value)} days`;
 }
 
 const searchableSelectRegistry = new Map();
@@ -838,9 +872,130 @@ function addCustomField(scope) {
   renderAllCustomFields();
 }
 
+function createEmptyTdsSlabs() {
+  return DEFAULT_TDS_SLAB_PLACEHOLDERS.map((slab) => ({
+    from: slab.from,
+    to: slab.to,
+    percent: slab.percent
+  }));
+}
+
+function markTdsConfigTouched() {
+  companyTdsConfigTouched = true;
+}
+
+function renderTdsSlabRows() {
+  tdsSlabRowsWrap.innerHTML = '';
+
+  if (!companyTdsSlabsState.length) {
+    companyTdsSlabsState = createEmptyTdsSlabs();
+  }
+
+  companyTdsSlabsState.forEach((slab, index) => {
+    const placeholder = DEFAULT_TDS_SLAB_PLACEHOLDERS[index] || { from: '2400001', to: '', percent: '30' };
+    const row = document.createElement('div');
+    row.className = 'tds-slab-row';
+    row.innerHTML = `
+      <input type="number" min="0" step="0.01" data-tds-slab-index="${index}" data-tds-slab-field="from" value="${escapeHtml(slab.from)}" placeholder="Ex: ${escapeHtml(placeholder.from)}">
+      <input type="number" min="0" step="0.01" data-tds-slab-index="${index}" data-tds-slab-field="to" value="${escapeHtml(slab.to)}" placeholder="${placeholder.to ? `Ex: ${escapeHtml(placeholder.to)}` : 'Blank for Above'}">
+      <input type="number" min="0" step="0.01" data-tds-slab-index="${index}" data-tds-slab-field="percent" value="${escapeHtml(slab.percent)}" placeholder="Ex: ${escapeHtml(placeholder.percent)}">
+      <button type="button" class="secondary-btn mini-btn" data-tds-slab-remove="${index}">Remove</button>
+    `;
+    tdsSlabRowsWrap.appendChild(row);
+  });
+}
+
+function resetTdsRuleEditor(tdsConfig = null, markTouched = false) {
+  companyTdsConfigTouched = markTouched;
+  companyFields.tdsStandardDeduction.value = tdsConfig?.standardDeduction ?? '';
+  companyFields.tdsRebateLimit.value = tdsConfig?.rebateLimit ?? '';
+  companyFields.tdsCessPercent.value = tdsConfig?.cessPercent ?? '';
+  companyTdsSlabsState = tdsConfig?.slabs?.length
+    ? tdsConfig.slabs.map((slab) => ({
+        from: String(slab.from ?? ''),
+        to: Number.isFinite(slab.to) ? String(slab.to) : '',
+        percent: String(slab.percent ?? '')
+      }))
+    : createEmptyTdsSlabs();
+  renderTdsSlabRows();
+}
+
+function readTdsRuleEditorConfig() {
+  const slabs = companyTdsSlabsState
+    .map((slab) => ({
+      from: String(slab.from ?? '').trim(),
+      to: String(slab.to ?? '').trim(),
+      percent: String(slab.percent ?? '').trim()
+    }))
+    .filter((slab) => slab.from || slab.to || slab.percent);
+
+  const hasHeaderValue = companyFields.tdsStandardDeduction.value.trim()
+    || companyFields.tdsRebateLimit.value.trim()
+    || companyFields.tdsCessPercent.value.trim();
+
+  if (!hasHeaderValue && !slabs.length) {
+    return null;
+  }
+
+  return {
+    standardDeduction: moneyValue(companyFields.tdsStandardDeduction.value),
+    rebateLimit: moneyValue(companyFields.tdsRebateLimit.value),
+    cessPercent: moneyValue(companyFields.tdsCessPercent.value),
+    slabs: slabs.map((slab) => ({
+      from: moneyValue(slab.from),
+      to: slab.to === '' ? Infinity : moneyValue(slab.to),
+      percent: moneyValue(slab.percent)
+    }))
+  };
+}
+
+function serializeTdsRuleConfig(config) {
+  if (!config) {
+    return '';
+  }
+
+  return JSON.stringify({
+    type: 'structured-tds-rule',
+    version: 1,
+    standardDeduction: numberValue(config.standardDeduction),
+    rebateLimit: numberValue(config.rebateLimit),
+    cessPercent: numberValue(config.cessPercent),
+    slabs: config.slabs.map((slab) => ({
+      from: numberValue(slab.from),
+      to: Number.isFinite(slab.to) ? numberValue(slab.to) : null,
+      percent: numberValue(slab.percent)
+    }))
+  });
+}
+
+function validateTdsRuleConfig(config) {
+  if (!config) {
+    return { valid: true };
+  }
+
+  if (!config.slabs.length) {
+    return { valid: false, message: 'Please add at least one TDS slab or keep all TDS fields empty for default logic.' };
+  }
+
+  for (const slab of config.slabs) {
+    if (slab.percent < 0) {
+      return { valid: false, message: 'TDS slab percent cannot be negative.' };
+    }
+    if (slab.to !== Infinity && slab.to < slab.from) {
+      return { valid: false, message: 'TDS slab To Amount must be greater than or equal to From Amount.' };
+    }
+  }
+
+  return { valid: true };
+}
+
 function buildCompanyPayload() {
   const code = companyFields.code.value.trim()
     || slugify(companyFields.displayName.value || companyFields.legalName.value);
+  const tdsConfig = companyTdsConfigTouched ? readTdsRuleEditorConfig() : null;
+  const tdsRule = companyTdsConfigTouched
+    ? serializeTdsRuleConfig(tdsConfig)
+    : companyTdsRuleOriginal;
   return {
     id: editingCompanyId,
     code,
@@ -870,13 +1025,180 @@ function buildCompanyPayload() {
     bankAccountNumber: companyFields.bankAccountNumber.value.trim(),
     ifsc: companyFields.ifsc.value.trim(),
     paymentMode: companyFields.paymentMode.value.trim() || 'Bank Transfer',
+    salaryCalculationBase: companyFields.salaryCalculationBase.value || 'full-month',
     defaultPfEnabled: companyFields.defaultPfEnabled.checked,
     defaultPtEnabled: companyFields.defaultPtEnabled.checked,
     defaultPfAmount: numberValue(companyFields.defaultPfAmount.value),
     defaultPtAmount: numberValue(companyFields.defaultPtAmount.value),
     payslipNote: companyFields.payslipNote.value.trim(),
+    tdsRule,
     documentFooter: companyFields.documentFooter.value.trim(),
     customFields: serializeCustomFields(companyCustomFieldsState)
+  };
+}
+
+function resolveSalaryCalculationBase(company, month, year) {
+  const configuredBase = String(company?.salaryCalculationBase || 'full-month');
+  const calendarDays = new Date(year, month, 0).getDate();
+  if (configuredBase === '22' || configuredBase === '26') {
+    return {
+      days: Number(configuredBase),
+      label: `${configuredBase} Days`
+    };
+  }
+
+  return {
+    days: calendarDays,
+    label: 'Full Month'
+  };
+}
+
+function parseTdsRule(ruleText) {
+  const rule = String(ruleText || '').trim();
+  if (!rule) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(rule);
+    if (parsed && Array.isArray(parsed.slabs)) {
+      const config = {
+        standardDeduction: moneyValue(parsed.standardDeduction),
+        rebateLimit: moneyValue(parsed.rebateLimit),
+        cessPercent: moneyValue(parsed.cessPercent),
+        slabs: parsed.slabs
+          .map((slab) => ({
+            from: moneyValue(slab?.from),
+            to: slab?.to === null || slab?.to === '' || typeof slab?.to === 'undefined'
+              ? Infinity
+              : moneyValue(slab.to),
+            percent: moneyValue(slab?.percent)
+          }))
+          .filter((slab) => slab.percent >= 0)
+      };
+      config.slabs.sort((first, second) => first.from - second.from);
+      return config.slabs.length ? config : null;
+    }
+  } catch (error) {
+    // Keep supporting the older plain-text rule format.
+  }
+
+  const config = {
+    standardDeduction: 0,
+    rebateLimit: 0,
+    cessPercent: 0,
+    slabs: []
+  };
+
+  const standardDeductionMatch = rule.match(/standard\s+deduction\s*[:=-]\s*([\d,]+(?:\.\d+)?)/i);
+  if (standardDeductionMatch) {
+    config.standardDeduction = numberValue(standardDeductionMatch[1].replace(/,/g, ''));
+  }
+
+  const rebateLimitMatch = rule.match(/rebate\s+limit\s*[:=-]\s*([\d,]+(?:\.\d+)?)/i);
+  if (rebateLimitMatch) {
+    config.rebateLimit = numberValue(rebateLimitMatch[1].replace(/,/g, ''));
+  }
+
+  const cessMatch = rule.match(/cess\s*[:=-]\s*([\d,]+(?:\.\d+)?)\s*%?/i);
+  if (cessMatch) {
+    config.cessPercent = numberValue(cessMatch[1].replace(/,/g, ''));
+  }
+
+  rule.split(/\r?\n/).forEach((line) => {
+    const cleanedLine = line.trim();
+    const slabMatch = cleanedLine.match(/^([\d,]+(?:\.\d+)?)\s*-\s*([\d,]+(?:\.\d+)?)\s*[:=]\s*([\d,]+(?:\.\d+)?)\s*%/i);
+    if (slabMatch) {
+      config.slabs.push({
+        from: numberValue(slabMatch[1].replace(/,/g, '')),
+        to: numberValue(slabMatch[2].replace(/,/g, '')),
+        percent: numberValue(slabMatch[3].replace(/,/g, ''))
+      });
+      return;
+    }
+
+    const aboveMatch = cleanedLine.match(/^above\s+([\d,]+(?:\.\d+)?)\s*[:=]\s*([\d,]+(?:\.\d+)?)\s*%/i);
+    if (aboveMatch) {
+      const from = numberValue(aboveMatch[1].replace(/,/g, '')) + 1;
+      config.slabs.push({
+        from,
+        to: Infinity,
+        percent: numberValue(aboveMatch[2].replace(/,/g, ''))
+      });
+    }
+  });
+
+  config.slabs.sort((first, second) => first.from - second.from);
+  return config.slabs.length ? config : null;
+}
+
+function calculateAnnualTaxFromConfig(annualIncome, tdsConfig, annualTaxableDeductions = 0) {
+  if (!tdsConfig) {
+    return null;
+  }
+
+  const taxableIncome = Math.max(
+    0,
+    numberValue(annualIncome) - numberValue(tdsConfig.standardDeduction) - numberValue(annualTaxableDeductions)
+  );
+  if (tdsConfig.rebateLimit && taxableIncome <= tdsConfig.rebateLimit) {
+    return {
+      taxableIncome,
+      taxBeforeCess: 0,
+      cessAmount: 0,
+      annualTax: 0,
+      monthlyTds: 0
+    };
+  }
+
+  const taxBeforeCess = tdsConfig.slabs.reduce((total, slab) => {
+    if (taxableIncome < slab.from) {
+      return total;
+    }
+
+    const slabUpper = Number.isFinite(slab.to) ? slab.to : taxableIncome;
+    const lowerBoundary = slab.from > 0 ? slab.from - 1 : 0;
+    const slabAmount = Math.max(0, Math.min(taxableIncome, slabUpper) - lowerBoundary);
+    return total + (slabAmount * numberValue(slab.percent) / 100);
+  }, 0);
+
+  const cessAmount = taxBeforeCess * numberValue(tdsConfig.cessPercent) / 100;
+  const annualTax = taxBeforeCess + cessAmount;
+  return {
+    taxableIncome,
+    taxBeforeCess,
+    cessAmount,
+    annualTax,
+    monthlyTds: annualTax / 12
+  };
+}
+
+function calculateMonthlyTds(earned, tdsOverride, company, monthlyProfessionalTax = 0) {
+  if (tdsOverride > 0) {
+    return {
+      monthlyTds: tdsOverride,
+      annualTax: tdsOverride * 12,
+      taxableIncome: 0,
+      source: 'override'
+    };
+  }
+
+  const annualIncome = earned * 12;
+  const professionalTaxForIncomeTax = monthlyProfessionalTax || numberValue(company?.defaultPtAmount);
+  const customTax = calculateAnnualTaxFromConfig(annualIncome, parseTdsRule(company?.tdsRule), professionalTaxForIncomeTax * 12);
+  if (customTax) {
+    return {
+      ...customTax,
+      source: 'company-rule'
+    };
+  }
+
+  const monthlyTds = annualIncome > 1200000 || earned > 100000 ? earned * 0.1 : 0;
+  return {
+    monthlyTds,
+    annualTax: monthlyTds * 12,
+    taxableIncome: annualIncome,
+    source: 'default'
   };
 }
 
@@ -950,6 +1272,9 @@ function resetCompanyForm() {
   companyFields.recordId.value = '';
   companyFields.country.value = 'India';
   companyFields.paymentMode.value = 'Bank Transfer';
+  companyFields.salaryCalculationBase.value = 'full-month';
+  companyTdsRuleOriginal = '';
+  resetTdsRuleEditor(null, false);
   renderAllCustomFields();
 }
 
@@ -1037,11 +1362,14 @@ function editCompany(company) {
   companyFields.bankAccountNumber.value = company.bankAccountNumber || '';
   companyFields.ifsc.value = company.ifsc || '';
   companyFields.paymentMode.value = company.paymentMode || 'Bank Transfer';
+  companyFields.salaryCalculationBase.value = company.salaryCalculationBase || 'full-month';
   companyFields.defaultPfEnabled.checked = Boolean(company.defaultPfEnabled);
   companyFields.defaultPtEnabled.checked = Boolean(company.defaultPtEnabled);
   companyFields.defaultPfAmount.value = company.defaultPfAmount || '';
   companyFields.defaultPtAmount.value = company.defaultPtAmount || '';
   companyFields.payslipNote.value = company.payslipNote || '';
+  companyTdsRuleOriginal = company.tdsRule || '';
+  resetTdsRuleEditor(parseTdsRule(company.tdsRule), false);
   companyFields.documentFooter.value = company.documentFooter || '';
   companyCustomFieldsState = parseCustomFields(company.customFields);
   renderAllCustomFields();
@@ -1931,6 +2259,44 @@ companyCustomFieldsWrap.addEventListener('click', (event) => {
   renderAllCustomFields();
 });
 
+[
+  companyFields.tdsStandardDeduction,
+  companyFields.tdsRebateLimit,
+  companyFields.tdsCessPercent
+].forEach((field) => {
+  field.addEventListener('input', markTdsConfigTouched);
+});
+
+tdsSlabRowsWrap.addEventListener('input', (event) => {
+  const target = event.target;
+  if (!(target instanceof HTMLElement) || !target.dataset.tdsSlabIndex) {
+    return;
+  }
+
+  const index = Number(target.dataset.tdsSlabIndex);
+  const field = target.dataset.tdsSlabField;
+  if (!companyTdsSlabsState[index] || !['from', 'to', 'percent'].includes(field)) {
+    return;
+  }
+
+  companyTdsSlabsState[index][field] = target.value;
+  markTdsConfigTouched();
+});
+
+tdsSlabRowsWrap.addEventListener('click', (event) => {
+  const button = event.target.closest('button[data-tds-slab-remove]');
+  if (!button) {
+    return;
+  }
+
+  companyTdsSlabsState.splice(Number(button.dataset.tdsSlabRemove), 1);
+  if (!companyTdsSlabsState.length) {
+    companyTdsSlabsState = createEmptyTdsSlabs();
+  }
+  markTdsConfigTouched();
+  renderTdsSlabRows();
+});
+
 employeeFields.profilePhoto.addEventListener('change', async () => {
   const file = employeeFields.profilePhoto.files && employeeFields.profilePhoto.files[0];
   employeeProfilePhotoData = file ? await readFileAsDataUrl(file) : '';
@@ -2017,6 +2383,18 @@ companyForm.addEventListener('submit', async (event) => {
     return;
   }
 
+  if (!['full-month', '26', '22'].includes(payload.salaryCalculationBase)) {
+    alert('Please select a valid salary calculation base.');
+    return;
+  }
+
+  const tdsValidation = validateTdsRuleConfig(readTdsRuleEditorConfig());
+  if (!tdsValidation.valid) {
+    alert(tdsValidation.message);
+    companyFields.tdsStandardDeduction.focus();
+    return;
+  }
+
   if (editingCompanyId) {
     await window.api.updateCompany(payload);
   } else {
@@ -2051,6 +2429,11 @@ resetCompanyBtn.addEventListener('click', resetCompanyForm);
 resetPolicyBtn.addEventListener('click', resetPolicyForm);
 addEmployeeFieldBtn.addEventListener('click', () => addCustomField('employee'));
 addCompanyFieldBtn.addEventListener('click', () => addCustomField('company'));
+addTdsSlabBtn.addEventListener('click', () => {
+  companyTdsSlabsState.push({ from: '', to: '', percent: '' });
+  markTdsConfigTouched();
+  renderTdsSlabRows();
+});
 
 document.querySelectorAll('[data-policy-template]').forEach((button) => {
   button.addEventListener('click', () => {
@@ -2149,10 +2532,14 @@ downloadIdCardPdfBtn.addEventListener('click', async () => {
     }
   }
 
-  await window.api.generateIdCardPdf({
-    html: lastIdCardData.html,
-    fileName: `${(lastIdCardData.employee.employeeId || 'EMPLOYEE').replace(/[^A-Z0-9_-]/gi, '_')}_ID_Card.pdf`
-  });
+  try {
+    await window.api.generateIdCardPdf({
+      html: lastIdCardData.html,
+      fileName: `${(lastIdCardData.employee.employeeId || 'EMPLOYEE').replace(/[^A-Z0-9_-]/gi, '_')}_ID_Card.pdf`
+    });
+  } catch (error) {
+    alert(`Unable to generate ID card PDF. ${error?.message || error}`);
+  }
 });
 
 payslipForm.addEventListener('submit', async (event) => {
@@ -2174,9 +2561,12 @@ payslipForm.addEventListener('submit', async (event) => {
   const month = numberValue(payslipInputs.monthSelect.value);
   const year = numberValue(payslipInputs.yearSelect.value);
   const presentDays = numberValue(payslipInputs.attendance.value);
-  const totalDays = new Date(year, month, 0).getDate();
+  const salaryBase = resolveSalaryCalculationBase(company, month, year);
+  const totalDays = salaryBase.days;
+  const calendarDays = new Date(year, month, 0).getDate();
   const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long' }).toUpperCase();
   const extraAllowance = numberValue(payslipInputs.extraAllowance.value);
+  const loanOtherDeduction = moneyValue(payslipInputs.loanOtherDeduction.value);
   const tdsOverride = numberValue(payslipInputs.tdsOverride.value);
 
   const grossFull = numberValue(employee.basic) + numberValue(employee.hra) + numberValue(employee.specialAllowance) + extraAllowance;
@@ -2188,15 +2578,10 @@ payslipForm.addEventListener('submit', async (event) => {
 
   const pf = pfCheck.checked ? numberValue(company.defaultPfAmount) : 0;
   const pt = ptCheck.checked ? numberValue(company.defaultPtAmount) : 0;
-  let tds = tdsOverride;
-  if (!tdsOverride) {
-    const yearlySalary = earned * 12;
-    if (yearlySalary > 1200000 || earned > 100000) {
-      tds = earned * 0.1;
-    }
-  }
+  const tdsResult = calculateMonthlyTds(earned, tdsOverride, company, pt);
+  const tds = Math.round(tdsResult.monthlyTds);
 
-  const totalDed = pf + pt + tds;
+  const totalDed = pf + pt + tds + loanOtherDeduction;
   const net = earned - totalDed;
 
   payslipPreviewEls.container.style.display = 'block';
@@ -2236,17 +2621,19 @@ payslipForm.addEventListener('submit', async (event) => {
   payslipPreviewEls.dPf.innerText = formatCurrency(pf);
   payslipPreviewEls.dPt.innerText = formatCurrency(pt);
   payslipPreviewEls.dTds.innerText = formatCurrency(tds);
+  payslipPreviewEls.dLoanOther.innerText = formatCurrency(loanOtherDeduction);
   payslipPreviewEls.dTotal.innerText = formatCurrency(totalDed);
-  payslipPreviewEls.aTotal.innerText = `${totalDays} days`;
-  payslipPreviewEls.aPresent.innerText = `${presentDays} days`;
-  payslipPreviewEls.aAbsent.innerText = `${totalDays - presentDays} days`;
+  payslipPreviewEls.aTotal.innerText = daysLabel(totalDays);
+  payslipPreviewEls.aPresent.innerText = daysLabel(presentDays);
+  payslipPreviewEls.aAbsent.innerText = daysLabel(Math.max(0, totalDays - presentDays));
+  payslipPreviewEls.aSalaryBasis.innerText = salaryBase.label;
   payslipPreviewEls.pBank.innerText = employee.bankName || company.bankName || '-';
   payslipPreviewEls.pAcc.innerText = employee.accountNumber || company.bankAccountNumber || '-';
   payslipPreviewEls.pIfsc.innerText = employee.ifsc || company.ifsc || '-';
   payslipPreviewEls.pPeriod.innerText = `${monthName} ${year}`;
   payslipPreviewEls.pPaymentMode.innerText = company.paymentMode || 'Bank Transfer';
   payslipPreviewEls.pNet.innerText = net.toFixed(2);
-  payslipPreviewEls.pDays.innerText = `${presentDays}/${totalDays} days`;
+  payslipPreviewEls.pDays.innerText = `${formatDays(presentDays)}/${formatDays(totalDays)} days`;
   payslipPreviewEls.payslipNote.innerText = company.payslipNote || 'This is a computer-generated payslip and does not require a signature.';
 
   if (company.logoData) {
@@ -2274,11 +2661,15 @@ payslipForm.addEventListener('submit', async (event) => {
     pf,
     pt,
     tds,
+    tdsResult,
     totalDed,
     net,
     totalDays,
+    calendarDays,
     presentDays,
+    salaryBaseLabel: salaryBase.label,
     extraAllowance,
+    loanOtherDeduction,
     employeeDynamicFields
   };
 });
@@ -2299,11 +2690,15 @@ downloadBtn.addEventListener('click', async () => {
     pf,
     pt,
     tds,
+    tdsResult,
     totalDed,
     net,
     totalDays,
+    calendarDays,
     presentDays,
+    salaryBaseLabel,
     extraAllowance,
+    loanOtherDeduction,
     employeeDynamicFields
   } = lastPayslipData;
 
@@ -2347,10 +2742,15 @@ downloadBtn.addEventListener('click', async () => {
       PF_AMT: pf.toFixed(2),
       PT: pt.toFixed(2),
       TDS: tds.toFixed(2),
+      ANNUAL_TDS: numberValue(tdsResult?.annualTax).toFixed(2),
+      TAXABLE_INCOME: numberValue(tdsResult?.taxableIncome).toFixed(2),
+      LOAN_OTHER_DEDUCTION: loanOtherDeduction.toFixed(2),
       DED_TOTAL: totalDed.toFixed(2),
-      TOTAL_DAYS: `${totalDays} days`,
-      PRESENT_DAYS: `${presentDays} days`,
-      ABSENT_DAYS: `${totalDays - presentDays} days`,
+      TOTAL_DAYS: daysLabel(totalDays),
+      CALENDAR_DAYS: daysLabel(calendarDays),
+      PRESENT_DAYS: daysLabel(presentDays),
+      ABSENT_DAYS: daysLabel(Math.max(0, totalDays - presentDays)),
+      SALARY_BASIS: salaryBaseLabel,
       BANK: employee.bankName || company.bankName || '',
       ACCOUNT: employee.accountNumber || company.bankAccountNumber || '',
       IFSC: employee.ifsc || company.ifsc || '',
@@ -2414,7 +2814,9 @@ async function initializeApp() {
   employeeFields.employeeId.readOnly = false;
   companyFields.country.value = 'India';
   companyFields.paymentMode.value = 'Bank Transfer';
+  companyFields.salaryCalculationBase.value = 'full-month';
   idCardBackNote.value = 'This card is company property. If found, please return it to the HR department immediately.';
+  resetTdsRuleEditor(null, false);
   renderAllCustomFields();
   resetPolicyForm();
   await initHrDocuments();

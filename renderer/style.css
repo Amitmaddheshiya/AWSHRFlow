@@ -678,6 +678,67 @@ textarea:focus {
   background: rgba(9, 15, 31, 0.62);
 }
 
+.tds-config-shell {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(200, 169, 93, 0.16);
+  background: rgba(9, 15, 31, 0.48);
+}
+
+.tds-config-shell .dynamic-field-head {
+  align-items: center;
+}
+
+.tds-config-shell .dynamic-field-head > div {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.tds-config-shell .dynamic-hint {
+  white-space: nowrap;
+}
+
+.tds-config-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.tds-slab-head,
+.tds-slab-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(90px, 0.6fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.tds-slab-head {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tds-slab-list {
+  display: grid;
+  gap: 10px;
+}
+
+.tds-slab-row {
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(200, 169, 93, 0.12);
+  background: rgba(8, 14, 27, 0.56);
+}
+
 .mini-btn {
   padding: 8px 12px;
   font-size: 11px;
@@ -1708,8 +1769,13 @@ textarea:focus {
   .form-row.single,
   .form-row.checkbox-row,
   .dynamic-field-item,
+  .tds-config-grid,
   .hr-input-card.flow-card {
     grid-template-columns: 1fr;
+  }
+
+  .tds-config-shell .dynamic-hint {
+    white-space: normal;
   }
 
   .form-row.span-3 {

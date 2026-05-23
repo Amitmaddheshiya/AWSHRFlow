@@ -391,6 +391,15 @@
               </div>
 
               <div class="form-row">
+                <label for="salaryCalculationBase">Salary Calculation Base</label>
+                <select id="salaryCalculationBase">
+                  <option value="full-month">Full Month</option>
+                  <option value="26">26 Days</option>
+                  <option value="22">22 Days</option>
+                </select>
+              </div>
+
+              <div class="form-row">
                 <label for="defaultPfAmount">Default PF Amount</label>
                 <input type="number" id="defaultPfAmount">
               </div>
@@ -428,6 +437,41 @@
               <div class="form-row span-3">
                 <label for="companyPayslipNote">Payslip Note</label>
                 <textarea id="companyPayslipNote" rows="2"></textarea>
+              </div>
+
+              <div class="form-row span-3 tds-config-shell">
+                <div class="dynamic-field-head">
+                  <div>
+                    <label class="dynamic-label">TDS Rule / Tax Configuration</label>
+                   
+                  </div>
+                  <button type="button" class="secondary-btn mini-btn" id="addTdsSlabBtn">Add Slab</button>
+                </div>
+
+                <div class="tds-config-grid">
+                  <div class="form-row">
+                    <label for="tdsStandardDeduction">Standard Deduction</label>
+                    <input type="number" id="tdsStandardDeduction" min="0" step="0.01" placeholder="Ex: 75000">
+                  </div>
+
+                  <div class="form-row">
+                    <label for="tdsRebateLimit">Rebate Limit</label>
+                    <input type="number" id="tdsRebateLimit" min="0" step="0.01" placeholder="Ex: 1200000">
+                  </div>
+
+                  <div class="form-row">
+                    <label for="tdsCessPercent">Cess %</label>
+                    <input type="number" id="tdsCessPercent" min="0" step="0.01" placeholder="Ex: 4">
+                  </div>
+                </div>
+
+                <div class="tds-slab-head">
+                  <span>From Amount</span>
+                  <span>To Amount</span>
+                  <span>Tax %</span>
+                  <span></span>
+                </div>
+                <div id="tdsSlabRows" class="tds-slab-list"></div>
               </div>
 
               <div class="form-row span-3">
@@ -661,12 +705,17 @@
 
               <div class="form-row">
                 <label for="attendance">Present Days</label>
-                <input type="number" id="attendance">
+                <input type="number" id="attendance" step="0.5" placeholder="Ex: 27.5 for 27 days + half day">
               </div>
 
               <div class="form-row">
                 <label for="extraAllowance">Extra Allowance</label>
                 <input type="number" id="extraAllowance" value="0">
+              </div>
+
+              <div class="form-row">
+                <label for="loanOtherDeduction">Loan &amp; Other Deduction</label>
+                <input type="number" id="loanOtherDeduction" value="0" min="0" step="0.01" placeholder="Enter amount to deduct">
               </div>
 
               <div class="form-row">
@@ -809,11 +858,13 @@
               <table>
                 <tr><td>Provident Fund</td><td id="dPf"></td></tr>
                 <tr><td>Professional Tax</td><td id="dPt"></td></tr>
-                <tr><td>TDS</td><td id="dTds"></td></tr>
+                <tr><td>Monthly TDS</td><td id="dTds"></td></tr>
+                <tr><td>Loan &amp; Other Deduction</td><td id="dLoanOther"></td></tr>
                 <tr class="bold"><td>Total Deductions</td><td id="dTotal"></td></tr>
                 <tr><td>Total Days</td><td id="aTotal"></td></tr>
                 <tr><td>Present Days</td><td id="aPresent"></td></tr>
                 <tr><td>Absent Days</td><td id="aAbsent"></td></tr>
+                <tr><td>Salary Basis</td><td id="aSalaryBasis"></td></tr>
                 <tr><td>Pay Period</td><td id="pPeriod"></td></tr>
                 <tr><td>Payment Mode</td><td id="pPaymentMode"></td></tr>
               </table>
@@ -891,7 +942,7 @@
               <h2 id="idCardPreviewTitle">Employee ID Card</h2>
             </div>
             <div class="preview-actions">
-              <button id="downloadIdCardPdfBtn" class="pdf-btn">Download PDF</button>
+              <button type="button" id="downloadIdCardPdfBtn" class="pdf-btn">Download PDF</button>
             </div>
           </div>
 
@@ -988,7 +1039,7 @@
                 <h2>Preview Final Document</h2>
               </div>
               <div class="preview-actions">
-                <button id="downloadHrPdfBtn" class="pdf-btn">Download PDF</button>
+                <button type="button" id="downloadHrPdfBtn" class="pdf-btn">Download PDF</button>
               </div>
             </div>
             <div id="hrPreviewMeta" class="hr-preview-meta">Choose a document template to see the generated preview.</div>

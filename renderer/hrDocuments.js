@@ -1268,6 +1268,8 @@
       const photoHtml = data.profilePhoto
         ? `<img class="profile-photo" src="${data.profilePhoto}" alt="Employee Photo">`
         : `<div class="profile-photo profile-fallback">${escapeHtml((data.employeeName || 'Employee').split(' ').map((part) => part.charAt(0)).slice(0, 2).join(''))}</div>`;
+      const watermarkText = safeText(data.companyLegalName, data.companyName || 'Company');
+      const watermarkFontSize = Math.max(24, Math.min(48, Math.floor(900 / Math.max(watermarkText.length, 18))));
 
       const signatureMarkup = buildSignatureMarkup(content.signatureMode, data);
       const tableMarkup = content.tableRows?.length
@@ -1314,7 +1316,7 @@
       const html = `
         <style>${buildDocumentCss(theme, data)}</style>
         <div class="hr-document-page theme-${theme.id}">
-          <div class="watermark">${escapeHtml(safeText(data.companyLegalName, data.companyName || 'Company'))}</div>
+          <div class="watermark" style="--watermark-font-size: ${watermarkFontSize}px;">${escapeHtml(watermarkText)}</div>
           <header class="document-header">
             <div class="brand-block">
               ${logoHtml}
@@ -1458,20 +1460,23 @@
         }
         .watermark {
           position: absolute;
-          top: 50%;
+          top: 44%;
           left: 50%;
-          transform: translate(-50%, -50%) rotate(-32deg);
+          transform: translate(-50%, -50%) rotate(-24deg);
           transform-origin: center;
-          width: 150%;
-          max-width: none;
+          width: calc(100% - 86px);
+          max-width: 680px;
+          max-height: 190px;
+          overflow: hidden;
           text-align: center;
           white-space: normal;
-          word-break: break-word;
+          overflow-wrap: anywhere;
+          word-break: normal;
           line-height: 1.15;
           opacity: 0.06;
-          font-size: 48px;
+          font-size: var(--watermark-font-size, 42px);
           font-weight: 700;
-          letter-spacing: 0.18em;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
           pointer-events: none;
           z-index: 0;
@@ -1748,10 +1753,11 @@
             inset: 6mm;
           }
           .watermark {
-            top: 48%;
+            top: 44%;
             left: 50%;
-            width: 156%;
-            font-size: 50px;
+            width: calc(100% - 28mm);
+            max-width: 680px;
+            font-size: var(--watermark-font-size, 42px);
             opacity: 0.06;
           }
         }
@@ -1767,10 +1773,18 @@
       }
 
       const fileName = `${slugify(state.formData.employeeName || 'employee')}_${slugify(documentDefinition.name)}_${theme.id}.pdf`;
-      await window.api.generateHrDocumentPdf({
-        html: `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${escapeHtml(documentDefinition.name)}</title></head><body style="margin:0;background:#ffffff;">${state.previewHtml}</body></html>`,
-        fileName
-      });
+      try {
+        const result = await window.api.generateHrDocumentPdf({
+          html: `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${escapeHtml(documentDefinition.name)}</title></head><body style="margin:0;background:#ffffff;">${state.previewHtml}</body></html>`,
+          fileName
+        });
+
+        if (result?.canceled) {
+          return;
+        }
+      } catch (error) {
+        alert(`Unable to generate HR document PDF. ${error?.message || error}`);
+      }
     }
 
     function slugify(value) {
