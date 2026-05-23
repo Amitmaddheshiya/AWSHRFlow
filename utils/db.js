@@ -192,6 +192,7 @@ const EMPLOYEE_COLUMNS = [
   ['ifsc', 'TEXT'],
   ['pfNo', 'TEXT'],
   ['pfUAN', 'TEXT'],
+  ['pfDeductAmount', 'REAL DEFAULT 0'],
   ['esiNo', 'TEXT'],
   ['pan', 'TEXT'],
   ['basic', 'REAL DEFAULT 0'],
@@ -1021,6 +1022,7 @@ async function addEmployee(employee) {
       basic: employee.basic || 0,
       hra: employee.hra || 0,
       specialAllowance: employee.specialAllowance || 0,
+      pfDeductAmount: employee.pfDeductAmount || 0,
       bonus: employee.bonus || 0,
       ctc: employee.ctc || 0,
       profilePhoto: employee.profilePhoto || '',
@@ -1034,11 +1036,11 @@ async function addEmployee(employee) {
   const result = await run(
     `INSERT INTO employees (
       name, employeeId, designation, department, company, companyId, doj, location,
-      bankName, accountNumber, ifsc, pfNo, pfUAN, esiNo, pan, basic, hra,
+      bankName, accountNumber, ifsc, pfNo, pfUAN, pfDeductAmount, esiNo, pan, basic, hra,
       specialAllowance, mobileNumber, email, address, aadhaar, employmentType,
       reportingManager, bonus, ctc, emergencyContact, profilePhoto, customFields, createdAt, updatedAt
     ) VALUES (
-      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     )`,
     [
       employee.name,
@@ -1054,6 +1056,7 @@ async function addEmployee(employee) {
       employee.ifsc,
       employee.pfNo,
       employee.pfUAN,
+      employee.pfDeductAmount || 0,
       employee.esiNo,
       employee.pan,
       employee.basic || 0,
@@ -1093,6 +1096,7 @@ async function updateEmployee(employee) {
       basic: employee.basic || 0,
       hra: employee.hra || 0,
       specialAllowance: employee.specialAllowance || 0,
+      pfDeductAmount: employee.pfDeductAmount || 0,
       bonus: employee.bonus || 0,
       ctc: employee.ctc || 0,
       profilePhoto: employee.profilePhoto || '',
@@ -1117,6 +1121,7 @@ async function updateEmployee(employee) {
       ifsc = ?,
       pfNo = ?,
       pfUAN = ?,
+      pfDeductAmount = ?,
       esiNo = ?,
       pan = ?,
       basic = ?,
@@ -1149,6 +1154,7 @@ async function updateEmployee(employee) {
       employee.ifsc,
       employee.pfNo,
       employee.pfUAN,
+      employee.pfDeductAmount || 0,
       employee.esiNo,
       employee.pan,
       employee.basic || 0,

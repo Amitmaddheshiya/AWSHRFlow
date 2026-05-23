@@ -83,6 +83,7 @@ const employeeFields = {
   ifsc: document.getElementById('ifsc'),
   pfNo: document.getElementById('pfNo'),
   pfUAN: document.getElementById('pfUAN'),
+  pfDeductAmount: document.getElementById('pfDeductAmount'),
   esiNo: document.getElementById('esiNo'),
   pan: document.getElementById('pan'),
   basic: document.getElementById('basic'),
@@ -805,6 +806,7 @@ function buildEmployeePayload() {
     ifsc: employeeFields.ifsc.value.trim(),
     pfNo: employeeFields.pfNo.value.trim(),
     pfUAN: employeeFields.pfUAN.value.trim(),
+    pfDeductAmount: numberValue(employeeFields.pfDeductAmount.value),
     esiNo: employeeFields.esiNo.value.trim(),
     pan: employeeFields.pan.value.trim(),
     basic: numberValue(employeeFields.basic.value),
@@ -1311,6 +1313,7 @@ function editEmployee(employee) {
   employeeFields.ifsc.value = employee.ifsc || '';
   employeeFields.pfNo.value = employee.pfNo || '';
   employeeFields.pfUAN.value = employee.pfUAN || '';
+  employeeFields.pfDeductAmount.value = employee.pfDeductAmount || '';
   employeeFields.esiNo.value = employee.esiNo || '';
   employeeFields.pan.value = employee.pan || '';
   employeeFields.basic.value = employee.basic || '';
@@ -2576,7 +2579,8 @@ payslipForm.addEventListener('submit', async (event) => {
   const splActual = (numberValue(employee.specialAllowance) / totalDays) * presentDays;
   const extraActual = (extraAllowance / totalDays) * presentDays;
 
-  const pf = pfCheck.checked ? numberValue(company.defaultPfAmount) : 0;
+  const employeePfAmount = numberValue(employee.pfDeductAmount);
+  const pf = pfCheck.checked ? (employeePfAmount > 0 ? employeePfAmount : numberValue(company.defaultPfAmount)) : 0;
   const pt = ptCheck.checked ? numberValue(company.defaultPtAmount) : 0;
   const tdsResult = calculateMonthlyTds(earned, tdsOverride, company, pt);
   const tds = Math.round(tdsResult.monthlyTds);

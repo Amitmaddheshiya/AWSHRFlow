@@ -532,6 +532,7 @@
               <tr><td>Bonus</td><td>${formatCurrency(employee.bonus)}</td></tr>
               <tr><td>CTC</td><td>${formatCurrency(employee.ctc)}</td></tr>
               <tr><td>PF Default</td><td>${formatCurrency(company?.defaultPfAmount || 0)}</td></tr>
+              <tr><td>Employee PF</td><td>${numberValue(employee.pfDeductAmount) > 0 ? formatCurrency(employee.pfDeductAmount) : 'Uses default'}</td></tr>
               <tr><td>PT Default</td><td>${formatCurrency(company?.defaultPtAmount || 0)}</td></tr>
               <tr><td>Salary Basis</td><td>${escapeHtml(company?.salaryCalculationBase === 'full-month' ? 'Full Month' : `${company?.salaryCalculationBase || 'Full Month'} Days`)}</td></tr>
               <tr><td>TDS Rule</td><td>${escapeHtml(company?.tdsRule ? 'Company Custom' : 'Default Logic')}</td></tr>
