@@ -133,9 +133,17 @@ ipcMain.handle('generate-payslip-pdf', async (event, data) => {
   const logoMarkup = data.templateData.COMPANY_LOGO_DATA
     ? `<img src="${data.templateData.COMPANY_LOGO_DATA}" class="company-logo" alt="Company Logo">`
     : `<img src="data:image/png;base64,${fallbackLogoBase64}" class="company-logo" alt="Company Logo">`;
+  const signatureMarkup = data.templateData.DIRECTOR_SIGNATURE_DATA
+    ? `<img src="${data.templateData.DIRECTOR_SIGNATURE_DATA}" alt="Director Signature">`
+    : '';
+  const stampMarkup = data.templateData.COMPANY_STAMP_DATA
+    ? `<img src="${data.templateData.COMPANY_STAMP_DATA}" alt="Company Stamp">`
+    : '';
 
   html = html.replace('</head>', `<style>${css}</style></head>`);
   html = html.replace('{{COMPANY_LOGO}}', logoMarkup);
+  html = html.replace('{{DIRECTOR_SIGNATURE}}', signatureMarkup);
+  html = html.replace('{{COMPANY_STAMP}}', stampMarkup);
 
   Object.entries(data.templateData).forEach(([key, value]) => {
     html = html.replaceAll(`{{${key}}}`, String(value ?? ''));
