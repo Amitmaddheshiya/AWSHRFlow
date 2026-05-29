@@ -175,8 +175,12 @@ const idCardFrontPreview = document.getElementById('idCardFrontPreview');
 const idCardBackPreview = document.getElementById('idCardBackPreview');
 const pfCheck = document.getElementById('pfCheck');
 const ptCheck = document.getElementById('ptCheck');
+const signatureCheck = document.getElementById('signatureCheck');
+const stampCheck = document.getElementById('stampCheck');
 const pfStatus = document.getElementById('pfStatus');
 const ptStatus = document.getElementById('ptStatus');
+const signatureStatus = document.getElementById('signatureStatus');
+const stampStatus = document.getElementById('stampStatus');
 
 const payslipInputs = {
   monthSelect: document.getElementById('monthSelect'),
@@ -1790,12 +1794,16 @@ function syncCompanyDrivenDeductions() {
 
   pfCheck.checked = Boolean(company?.defaultPfEnabled);
   ptCheck.checked = Boolean(company?.defaultPtEnabled);
+  signatureCheck.checked = Boolean(company?.signatureData);
+  stampCheck.checked = Boolean(company?.stampData);
   updateDeductionStatus();
 }
 
 function updateDeductionStatus() {
   pfStatus.textContent = `PF: ${pfCheck.checked ? 'YES' : 'NO'}`;
   ptStatus.textContent = `PT: ${ptCheck.checked ? 'YES' : 'NO'}`;
+  signatureStatus.textContent = `Signature: ${signatureCheck.checked ? 'YES' : 'NO'}`;
+  stampStatus.textContent = `Stamp: ${stampCheck.checked ? 'YES' : 'NO'}`;
 }
 
 function escapeHtml(value) {
@@ -2508,6 +2516,8 @@ downloadPolicyPdfBtn.addEventListener('click', async () => {
 employeeSelect.addEventListener('change', syncCompanyDrivenDeductions);
 pfCheck.addEventListener('change', updateDeductionStatus);
 ptCheck.addEventListener('change', updateDeductionStatus);
+signatureCheck.addEventListener('change', updateDeductionStatus);
+stampCheck.addEventListener('change', updateDeductionStatus);
 
 idCardEmployeeSelect.addEventListener('change', async () => {
   await renderIdCardPreview(true);
@@ -2733,8 +2743,8 @@ downloadBtn.addEventListener('click', async () => {
       COMPANY_GSTIN: company.gstin || '',
       COMPANY_PF_REG: company.pfRegistrationNo || '',
       COMPANY_LOGO_DATA: company.logoData || '',
-      COMPANY_STAMP_DATA: company.stampData || '',
-      DIRECTOR_SIGNATURE_DATA: company.signatureData || '',
+      COMPANY_STAMP_DATA: stampCheck.checked ? (company.stampData || '') : '',
+      DIRECTOR_SIGNATURE_DATA: signatureCheck.checked ? (company.signatureData || '') : '',
       DIRECTOR_NAME: company.directorName || 'Authorized Signatory',
       BASIC: numberValue(employee.basic).toFixed(2),
       BASIC_A: ((numberValue(employee.basic) / totalDays) * presentDays).toFixed(2),

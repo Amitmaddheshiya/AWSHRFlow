@@ -410,6 +410,10 @@ table {
   page-break-inside: avoid;
 }
 
+.approval-strip-single {
+  grid-template-columns: 1fr;
+}
+
 .approval-card {
   min-height: 92px;
   padding: 9px 10px;
