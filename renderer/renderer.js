@@ -587,7 +587,7 @@ function buildDynamicFieldPdfText(fields) {
   }
 
   return fields
-    .map((field) => `${field.label || 'Custom Field'}: ${field.value || '-'}`)
+    .map((field) => `${escapeHtml(field.label || 'Custom Field')}: ${escapeHtml(field.value || '-')}`)
     .join('\n');
 }
 
@@ -2717,8 +2717,8 @@ downloadBtn.addEventListener('click', async () => {
       DEPARTMENT: employee.department,
       DOJ: employee.doj,
       LOCATION: employee.location,
-      EMPLOYEE_ADDRESS: employee.address || employee.location || '',
-      EMERGENCY_CONTACT: employee.emergencyContact || '',
+      EMPLOYEE_ADDRESS: employee.address || employee.location || '-',
+      EMERGENCY_CONTACT: employee.emergencyContact || '-',
       EMPLOYEE_CUSTOM_FIELDS: buildDynamicFieldPdfText(employeeDynamicFields),
       PAN: employee.pan,
       PF: employee.pfNo,
