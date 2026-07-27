@@ -82,6 +82,9 @@
     employmentType: { label: 'Employment Type', type: 'text', group: 'Job' },
     reportingManager: { label: 'Reporting Manager', type: 'text', group: 'Job' },
     salary: { label: 'Current Salary', type: 'number', group: 'Compensation' },
+    basic: { label: 'Basic Salary', type: 'number', group: 'Compensation' },
+    hra: { label: 'HRA', type: 'number', group: 'Compensation' },
+    specialAllowance: { label: 'Special Allowance', type: 'number', group: 'Compensation' },
     bonus: { label: 'Bonus / Variable Pay', type: 'number', group: 'Compensation' },
     incrementAmount: { label: 'Increment Amount', type: 'number', group: 'Compensation' },
     revisedSalary: { label: 'Revised Salary', type: 'number', group: 'Compensation' },
@@ -95,8 +98,26 @@
     companyEsicRegistration: { label: 'Company ESIC Registration', type: 'text', group: 'Company' },
     companyLogo: { label: 'Company Logo', type: 'file', accept: 'image/*', group: 'Company' },
     companyStamp: { label: 'Company Stamp', type: 'file', accept: 'image/*', group: 'Company' },
+    showCompanyStamp: { label: 'Show Company Stamp on Document', type: 'checkbox', group: 'Company' },
     companyPolicy: { label: 'Company Policy / Terms', type: 'textarea', group: 'Company' },
     salaryStructureNote: { label: 'Salary Structure Note', type: 'textarea', group: 'Compensation' },
+    joiningTime: { label: 'Joining Time', type: 'text', group: 'Job' },
+    requiredDocuments: { label: 'Required Documents', type: 'textarea', group: 'Job' },
+    probationPeriod: { label: 'Probation Period', type: 'text', group: 'Job' },
+    workingHoursPolicy: { label: 'Working Hours Policy', type: 'textarea', group: 'Job' },
+    rolesResponsibilities: { label: 'Roles & Responsibilities', type: 'textarea', group: 'Job' },
+    leavePolicy: { label: 'Leave Policy', type: 'textarea', group: 'Job' },
+    confidentialityClause: { label: 'Confidentiality Clause', type: 'textarea', group: 'Job' },
+    ipRightsClause: { label: 'IP Rights Clause', type: 'textarea', group: 'Job' },
+    codeOfConduct: { label: 'Code of Conduct', type: 'textarea', group: 'Job' },
+    benefitsPolicy: { label: 'Benefits Policy', type: 'textarea', group: 'Job' },
+    statutoryCompliance: { label: 'Statutory Compliance', type: 'textarea', group: 'Job' },
+    backgroundVerification: { label: 'Background Verification', type: 'textarea', group: 'Job' },
+    nonCompeteClause: { label: 'Non-Compete Clause', type: 'textarea', group: 'Job' },
+    generalTerms: { label: 'General Terms', type: 'textarea', group: 'Job' },
+    noticePeriodClause: { label: 'Notice Period Clause', type: 'textarea', group: 'Job' },
+    governingLaw: { label: 'Governing Law', type: 'textarea', group: 'Job' },
+    referenceNumber: { label: 'Reference Number', type: 'text', group: 'Document' },
     hrName: { label: 'HR Name', type: 'text', group: 'Approvals' },
     managerName: { label: 'Manager Name', type: 'text', group: 'Approvals' },
     directorName: { label: 'Director Name', type: 'text', group: 'Approvals' },
@@ -166,6 +187,62 @@
         ],
         closing: `Kindly sign and return a copy of this letter as token of your acceptance. We look forward to welcoming you to ${safeText(d.companyName, 'the Company')}.`,
         signatureMode: 'director'
+      })
+    },
+    {
+      id: 'offer-letter-4page',
+      name: 'Offer Letter (4-Page)',
+      short: 'Comprehensive 4-page offer letter with detailed terms and annexures.',
+      templateFile: 'offerLetter4Page.html',
+      fields: ['documentDate', 'employeeName', 'employeeId', 'designation', 'department', 'joiningDate', 'salary', 'basic', 'hra', 'specialAllowance', 'bonus', 'employmentType', 'workLocation', 'reportingManager', 'companyName', 'companyAddress', 'companyPhone', 'companyEmail', 'companyLogo', 'hrName', 'directorName', 'directorSignature', 'companyStamp', 'showCompanyStamp', 'noticePeriod', 'companyPolicy', 'salaryStructureNote', 'remarks', 'companyWebsite', 'companyGstin', 'companyPfRegistration', 'companyEsicRegistration', 'pan', 'aadhaar', 'pfNumber', 'bankName', 'accountNumber', 'joiningTime', 'requiredDocuments', 'probationPeriod', 'workingHoursPolicy', 'rolesResponsibilities', 'leavePolicy', 'confidentialityClause', 'ipRightsClause', 'codeOfConduct', 'benefitsPolicy', 'statutoryCompliance', 'backgroundVerification', 'nonCompeteClause', 'generalTerms', 'noticePeriodClause', 'governingLaw', 'referenceNumber', 'fontFamily'],
+      build: (d, helpers) => ({
+        templateData: {
+          FONT_FAMILY: safeText(d.fontFamily, 'Arial'),
+          COMPANY_LOGO: d.companyLogo ? `<img src="${d.companyLogo}" class="logo-img" alt="Company Logo">` : '<div class="logo-placeholder">NV</div>',
+          COMPANY_NAME: safeText(d.companyName, 'Company Name'),
+          COMPANY_TAGLINE: safeText(d.companyWebsite, 'the vision...'),
+          COMPANY_CIN: safeText(d.companyGstin, 'CIN: U72900GJ2015PTC085442'),
+          REFERENCE_NUMBER: safeText(d.referenceNumber, `NV/HR/OFFER/${new Date().getFullYear()}/${Math.floor(Math.random() * 1000)}`),
+          DOCUMENT_DATE: helpers.date(d.documentDate),
+          CANDIDATE_NAME: safeText(d.employeeName, 'Candidate Name'),
+          EMPLOYEE_ID: safeText(d.employeeId, 'EMP001'),
+          DESIGNATION: safeText(d.designation, 'Designation'),
+          DEPARTMENT: safeText(d.department, 'Department'),
+          WORK_LOCATION: safeText(d.workLocation, 'Work Location'),
+          REPORTING_MANAGER: safeText(d.reportingManager, 'Reporting Manager'),
+          JOINING_DATE: helpers.date(d.joiningDate),
+          JOINING_TIME: safeText(d.joiningTime, '10:30 AM'),
+          REQUIRED_DOCUMENTS: safeText(d.requiredDocuments, '• Original educational certificates\n• Previous employment documents\n• PAN Card\n• Aadhaar Card\n• Passport size photographs\n• Bank account details\n• Address proof'),
+          CTC_AMOUNT: helpers.money((numericValue(d.salary) * 12) + numericValue(d.bonus)),
+          PROBATION_PERIOD: safeText(d.probationPeriod, safeText(d.noticePeriod, 'three months')),
+          WORKING_HOURS_POLICY: safeText(d.workingHoursPolicy, 'The standard working hours are 10:30 AM to 07:30 PM, Monday through Friday. You may be required to work additional hours as per business requirements. Attendance will be monitored as per company policy.'),
+          ROLES_RESPONSIBILITIES: safeText(d.rolesResponsibilities, 'You will be responsible for performing the duties assigned to your role, meeting project deadlines, collaborating with team members, and contributing to the overall success of the company. Specific responsibilities will be communicated by your reporting manager.'),
+          LEAVE_POLICY: safeText(d.leavePolicy, 'You will be entitled to leave as per company policy including earned leave, sick leave, and casual leave. Leave requests must be submitted in advance and approved by your reporting manager.'),
+          CONFIDENTIALITY_CLAUSE: safeText(d.confidentialityClause, 'You agree to maintain strict confidentiality regarding all company information, trade secrets, client data, and proprietary information. Any breach of confidentiality may result in disciplinary action including termination.'),
+          IP_RIGHTS_CLAUSE: safeText(d.ipRightsClause, `All intellectual property created by you during your employment with ${safeText(d.companyName, 'the company')} shall be the sole property of the company. You agree to assign all rights to such intellectual property to the company.`),
+          CODE_OF_CONDUCT: safeText(d.codeOfConduct, 'You are expected to maintain high standards of professional conduct, integrity, and ethics. Any violation of the code of conduct may result in disciplinary action.'),
+          BENEFITS_POLICY: safeText(d.benefitsPolicy, 'You will be eligible for benefits as per company policy including health insurance, provident fund, and other statutory benefits. Details of benefits will be provided separately.'),
+          STATUTORY_COMPLIANCE: safeText(d.statutoryCompliance, 'Your employment will be subject to all applicable statutory requirements including PF, ESIC, and other labor laws as per government regulations.'),
+          BACKGROUND_VERIFICATION: safeText(d.backgroundVerification, 'This offer is contingent upon successful completion of background verification. The company reserves the right to withdraw this offer if any discrepancies are found.'),
+          NON_COMPETE_CLAUSE: safeText(d.nonCompeteClause, 'During your employment and for a period after termination, you agree not to engage in any competitive activity or solicit clients/employees of the company.'),
+          GENERAL_TERMS: safeText(d.generalTerms, 'This offer letter constitutes the entire agreement between you and the company regarding your employment. Any modifications must be made in writing and signed by both parties.'),
+          NOTICE_PERIOD_CLAUSE: safeText(d.noticePeriodClause, `Either party may terminate this employment by giving ${safeText(d.noticePeriod, 'thirty days')} written notice or salary in lieu thereof. The company may terminate employment without notice for cause.`),
+          GOVERNING_LAW: safeText(d.governingLaw, 'This offer letter shall be governed by the laws of India. Any disputes shall be subject to the exclusive jurisdiction of courts in Ahmedabad, Gujarat.'),
+          BASIC_MONTHLY: helpers.money(d.basic),
+          BASIC_ANNUAL: helpers.money(numericValue(d.basic) * 12),
+          HRA_MONTHLY: helpers.money(d.hra),
+          HRA_ANNUAL: helpers.money(numericValue(d.hra) * 12),
+          SPECIAL_ALLOWANCE_MONTHLY: helpers.money(d.specialAllowance),
+          SPECIAL_ALLOWANCE_ANNUAL: helpers.money(numericValue(d.specialAllowance) * 12),
+          TOTAL_GROSS_MONTHLY: helpers.money(d.salary),
+          TOTAL_GROSS_ANNUAL: helpers.money(numericValue(d.salary) * 12),
+          ANNUAL_BONUS: helpers.money(d.bonus),
+          TOTAL_CTC: helpers.money((numericValue(d.salary) * 12) + numericValue(d.bonus)),
+          COMPENSATION_NOTES: safeText(d.salaryStructureNote, 'All amounts are subject to statutory deductions as per applicable laws. The actual payout may vary based on attendance, performance, and company policy.'),
+          AUTHORISED_SIGNATORY: safeText(d.directorName || d.hrName, 'Authorised Signatory'),
+          COMPANY_STAMP: (d.showCompanyStamp && d.companyStamp) ? `<img src="${d.companyStamp}" class="logo-img" style="border-radius:50%;" alt="Company Stamp">` : '',
+          COMPANY_ADDRESS: safeText(d.companyAddress, 'Company Address')
+        }
       })
     },
     {
@@ -836,6 +913,9 @@
         employmentType: employee?.employmentType || 'Full Time',
         reportingManager: employee?.reportingManager || '',
         salary,
+        basic: numericValue(employee?.basic),
+        hra: numericValue(employee?.hra),
+        specialAllowance: numericValue(employee?.specialAllowance),
         bonus: numericValue(employee?.bonus),
         incrementAmount: 0,
         revisedSalary: salary,
@@ -880,6 +960,7 @@
         accountNumber: employee?.accountNumber || '',
         companyLogo: company?.logoData || '',
         companyStamp: company?.stampData || '',
+        showCompanyStamp: false,
         hrSignature: '',
         directorSignature: company?.signatureData || '',
         profilePhoto: employee?.profilePhoto || '',
@@ -1235,7 +1316,7 @@
       return;
     }
 
-    function renderPreview() {
+    async function renderPreview() {
       const documentDefinition = currentDocument();
       const theme = currentTheme();
       const employee = currentEmployee();
@@ -1248,7 +1329,7 @@
         return;
       }
 
-      state.previewHtml = buildDocumentHtml(documentDefinition, theme, state.formData, {
+      state.previewHtml = await buildDocumentHtml(documentDefinition, theme, state.formData, {
         date: formatDate,
         money: formatMoney,
         words: numberToWords
@@ -1259,7 +1340,38 @@
       els.previewMeta.textContent = `${documentDefinition.name} preview using ${theme.name} | Font: ${selectedFont}`;
     }
 
-    function buildDocumentHtml(documentDefinition, theme, data, helpers) {
+    async function buildDocumentHtml(documentDefinition, theme, data, helpers) {
+      // Check if document has a custom template file (for 4-page offer letter)
+      if (documentDefinition.templateFile) {
+        try {
+          const templateResponse = await fetch(documentDefinition.templateFile);
+          let templateHtml = await templateResponse.text();
+          
+          // Build template data using the document's build function
+          const baseContent = documentDefinition.build(data, helpers);
+          const templateData = baseContent.templateData || {};
+          
+          // Replace all placeholders in the template
+          Object.keys(templateData).forEach(key => {
+            const placeholder = `{{${key}}}`;
+            const value = templateData[key] || '';
+            templateHtml = templateHtml.replace(new RegExp(placeholder, 'g'), value);
+          });
+          
+          // Apply font family dynamically
+          if (templateData.FONT_FAMILY) {
+            const fontStyle = `<style>body { font-family: ${templateData.FONT_FAMILY}, 'Arial', 'Helvetica', sans-serif !important; }</style>`;
+            templateHtml = templateHtml.replace('</head>', fontStyle + '</head>');
+          }
+          
+          return templateHtml;
+        } catch (error) {
+          console.error('Error loading custom template:', error);
+          // Fallback to standard template if custom template fails
+        }
+      }
+
+      // Standard template rendering (existing logic)
       const baseContent = documentDefinition.build(data, helpers);
       const content = applyTemplateCopy(baseContent, data);
       const logoHtml = data.companyLogo

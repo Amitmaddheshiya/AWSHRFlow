@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Offer Letter - NextView Technologies</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 15mm 15mm 15mm 15mm;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      font-size: 11px;
+      line-height: 1.5;
+      color: #333;
+      background: white;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    
+    .page {
+      page-break-after: always;
+      min-height: 260mm;
+      position: relative;
+      padding: 0;
+    }
+    
+    .page:last-child {
+      page-break-after: auto;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #003366;
+    }
+    
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+    
+    .logo-img {
+      width: 70px;
+      height: 70px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    
+    .logo-placeholder {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #003366 0%, #0055a5 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 8px;
+      text-align: center;
+      flex-shrink: 0;
+      font-weight: bold;
+      padding: 5px;
+    }
+    
+    .company-info {
+      flex: 1;
+    }
+    
+    .company-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: #003366;
+      margin-bottom: 3px;
+    }
+    
+    .company-tagline {
+      font-size: 10px;
+      color: #666;
+      font-style: italic;
+    }
+    
+    .ref-section {
+      text-align: right;
+      font-size: 10px;
+      color: #333;
+      white-space: nowrap;
+      margin-left: 20px;
+    }
+    
+    .ref-number {
+      font-weight: bold;
+      color: #003366;
+      font-size: 11px;
+    }
+    
+    .date-section {
+      margin-top: 3px;
+      color: #555;
+    }
+    
+    .section-title {
+      font-size: 13px;
+      font-weight: bold;
+      color: #003366;
+      margin: 20px 0 12px 0;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #ccc;
+    }
+    
+    .section-number {
+      font-size: 13px;
+      font-weight: bold;
+      color: #003366;
+      margin: 18px 0 10px 0;
+    }
+    
+    .content-text {
+      font-size: 11px;
+      line-height: 1.6;
+      color: #333;
+      margin-bottom: 12px;
+      text-align: justify;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 15px 0;
+    }
+    
+    .info-item {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .info-label {
+      font-size: 10px;
+      font-weight: bold;
+      color: #003366;
+      margin-bottom: 2px;
+    }
+    
+    .info-value {
+      font-size: 11px;
+      color: #333;
+    }
+    
+    .table-section {
+      margin: 20px 0;
+    }
+    
+    .compensation-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+      margin: 15px 0;
+    }
+    
+    .compensation-table th {
+      background: #003366;
+      color: white;
+      font-weight: bold;
+      padding: 10px 12px;
+      text-align: left;
+      border: 1px solid #003366;
+    }
+    
+    .compensation-table th:nth-child(2),
+    .compensation-table th:nth-child(3) {
+      text-align: right;
+    }
+    
+    .compensation-table td {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    
+    .compensation-table td:nth-child(2),
+    .compensation-table td:nth-child(3) {
+      text-align: right;
+    }
+    
+    .compensation-table tr:nth-child(even) {
+      background: #f0f8ff;
+    }
+    
+    .compensation-table tr:nth-child(odd) {
+      background: white;
+    }
+    
+    .compensation-table .total-row td {
+      background: #e6f0ff;
+      font-weight: bold;
+      color: #003366;
+    }
+    
+    .notes-section {
+      font-size: 10px;
+      color: #555;
+      margin-top: 15px;
+      padding: 12px;
+      background: #f9f9f9;
+      border-left: 3px solid #003366;
+      line-height: 1.5;
+    }
+    
+    .signature-section {
+      margin-top: 40px;
+      display: flex;
+      justify-content: space-between;
+      gap: 40px;
+    }
+    
+    .signature-block {
+      flex: 1;
+    }
+    
+    .signature-line {
+      border-top: 1px solid #333;
+      margin-top: 50px;
+      padding-top: 8px;
+    }
+    
+    .signature-name {
+      font-size: 11px;
+      font-weight: bold;
+      color: #003366;
+    }
+    
+    .signature-title {
+      font-size: 10px;
+      color: #555;
+      margin-top: 2px;
+    }
+    
+    .acceptance-section {
+      margin-top: 30px;
+      padding: 20px;
+      border: 1px solid #003366;
+      background: #f8fbff;
+    }
+    
+    .acceptance-title {
+      font-size: 12px;
+      font-weight: bold;
+      color: #003366;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    
+    .acceptance-text {
+      font-size: 10px;
+      line-height: 1.6;
+      color: #333;
+      text-align: justify;
+    }
+    
+    .acceptance-signature {
+      margin-top: 25px;
+      display: flex;
+      gap: 40px;
+    }
+    
+    .footer {
+      position: absolute;
+      bottom: 5px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 9px;
+      color: #666;
+      padding: 10px;
+      border-top: 1px solid #ddd;
+    }
+    
+    .footer-company {
+      font-weight: bold;
+      color: #003366;
+      font-size: 10px;
+    }
+    
+    .footer-address {
+      margin-top: 2px;
+      color: #555;
+    }
+    
+    .footer-cin {
+      margin-top: 2px;
+      color: #777;
+      font-size: 8px;
+    }
+    
+    .stamp-area {
+      text-align: center;
+      margin-top: 15px;
+    }
+    
+    .stamp-placeholder {
+      width: 90px;
+      height: 90px;
+      border: 2px dashed #003366;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      color: #003366;
+      font-weight: bold;
+    }
+    
+    .page-number {
+      position: absolute;
+      bottom: 5px;
+      right: 15px;
+      font-size: 9px;
+      color: #999;
+    }
+    
+    strong {
+      color: #003366;
+      font-weight: bold;
+    }
+    
+    .greeting {
+      font-size: 11px;
+      margin-bottom: 15px;
+    }
+    
+    .paragraph {
+      margin-bottom: 12px;
+      text-align: justify;
+    }
+  </style>
+</head>
+<body>
+  <!-- PAGE 1 -->
+  <div class="page">
+    <div class="header">
+      <div class="logo-section">
+        {{COMPANY_LOGO}}
+        <div class="company-info">
+          <div class="company-name">{{COMPANY_NAME}}</div>
+          <div class="company-tagline">{{COMPANY_TAGLINE}}</div>
+        </div>
+      </div>
+      <div class="ref-section">
+        <div class="ref-number">Ref: {{REFERENCE_NUMBER}}</div>
+        <div class="date-section">Date: {{DOCUMENT_DATE}}</div>
+      </div>
+    </div>
+
+    <div class="greeting">
+      Dear <strong>{{CANDIDATE_NAME}}</strong>,
+    </div>
+
+    <div class="paragraph">
+      We are pleased to offer you the position of <strong>{{DESIGNATION}}</strong> at {{COMPANY_NAME}}. We believe your skills and experience will be a valuable addition to our team.
+    </div>
+
+    <div class="section-title">1. APPOINTMENT DETAILS</div>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-label">Candidate Name</div>
+        <div class="info-value">{{CANDIDATE_NAME}}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Employee ID</div>
+        <div class="info-value">{{EMPLOYEE_ID}}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Designation</div>
+        <div class="info-value">{{DESIGNATION}}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Department</div>
+        <div class="info-value">{{DEPARTMENT}}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Work Location</div>
+        <div class="info-value">{{WORK_LOCATION}}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Reporting To</div>
+        <div class="info-value">{{REPORTING_MANAGER}}</div>
+      </div>
+    </div>
+
+    <div class="section-title">2. COMMENCEMENT AND JOINING</div>
+
+    <div class="paragraph">
+      Your employment is scheduled to commence on <strong>{{JOINING_DATE}}</strong>. You are requested to report to the office at <strong>{{JOINING_TIME}}</strong> on the joining date.
+    </div>
+
+    <div class="paragraph">
+      Please bring the following documents at the time of joining:
+    </div>
+
+    <div class="content-text" style="margin-left: 20px; white-space: pre-line;">
+      {{REQUIRED_DOCUMENTS}}
+    </div>
+
+    <div class="section-title">3. DESIGNATION AND REPORTING</div>
+
+    <div class="paragraph">
+      You will be appointed as <strong>{{DESIGNATION}}</strong> and will report to <strong>{{REPORTING_MANAGER}}</strong>. Your role may be modified or reassigned based on business requirements.
+    </div>
+
+    <div class="section-title">4. REMUNERATION</div>
+
+    <div class="paragraph">
+      Your Cost to Company (CTC) will be <strong>Rs. {{CTC_AMOUNT}}/-</strong> per annum. The detailed compensation structure is provided in Annexure A attached to this offer letter.
+    </div>
+
+    <div class="section-title">5. PROBATION PERIOD</div>
+
+    <div class="paragraph">
+      Your initial probation period will be <strong>{{PROBATION_PERIOD}}</strong> from the date of joining. Your performance will be reviewed during this period, and upon satisfactory completion, your employment will be confirmed.
+    </div>
+
+    <div class="footer">
+      <div class="footer-company">{{COMPANY_NAME}}</div>
+      <div class="footer-cin">{{COMPANY_CIN}}</div>
+      <div class="footer-address">{{COMPANY_ADDRESS}}</div>
+    </div>
+    <div class="page-number">Page 1 of 4</div>
+  </div>
+
+  <!-- PAGE 2 -->
+  <div class="page">
+    <div class="header">
+      <div class="logo-section">
+        {{COMPANY_LOGO}}
+        <div class="company-info">
+          <div class="company-name">{{COMPANY_NAME}}</div>
+          <div class="company-tagline">{{COMPANY_TAGLINE}}</div>
+        </div>
+      </div>
+      <div class="ref-section">
+        <div class="ref-number">Ref: {{REFERENCE_NUMBER}}</div>
+        <div class="date-section">Date: {{DOCUMENT_DATE}}</div>
+      </div>
+    </div>
+
+    <div class="section-number">6. WORKING HOURS AND ATTENDANCE</div>
+
+    <div class="paragraph">
+      {{WORKING_HOURS_POLICY}}
+    </div>
+
+    <div class="section-number">7. ROLES AND RESPONSIBILITIES</div>
+
+    <div class="paragraph">
+      {{ROLES_RESPONSIBILITIES}}
+    </div>
+
+    <div class="section-number">8. LEAVE POLICY</div>
+
+    <div class="paragraph">
+      {{LEAVE_POLICY}}
+    </div>
+
+    <div class="section-number">9. CONFIDENTIALITY AND NON-DISCLOSURE</div>
+
+    <div class="paragraph">
+      {{CONFIDENTIALITY_CLAUSE}}
+    </div>
+
+    <div class="section-number">10. INTELLECTUAL PROPERTY RIGHTS</div>
+
+    <div class="paragraph">
+      {{IP_RIGHTS_CLAUSE}}
+    </div>
+
+    <div class="section-number">11. CODE OF CONDUCT AND ETHICS</div>
+
+    <div class="paragraph">
+      {{CODE_OF_CONDUCT}}
+    </div>
+
+    <div class="footer">
+      <div class="footer-company">{{COMPANY_NAME}}</div>
+      <div class="footer-cin">{{COMPANY_CIN}}</div>
+      <div class="footer-address">{{COMPANY_ADDRESS}}</div>
+    </div>
+    <div class="page-number">Page 2 of 4</div>
+  </div>
+
+  <!-- PAGE 3 -->
+  <div class="page">
+    <div class="header">
+      <div class="logo-section">
+        {{COMPANY_LOGO}}
+        <div class="company-info">
+          <div class="company-name">{{COMPANY_NAME}}</div>
+          <div class="company-tagline">{{COMPANY_TAGLINE}}</div>
+        </div>
+      </div>
+      <div class="ref-section">
+        <div class="ref-number">Ref: {{REFERENCE_NUMBER}}</div>
+        <div class="date-section">Date: {{DOCUMENT_DATE}}</div>
+      </div>
+    </div>
+
+    <div class="section-number">12. BENEFITS AND PERQUISITES</div>
+
+    <div class="paragraph">
+      {{BENEFITS_POLICY}}
+    </div>
+
+    <div class="section-number">13. STATUTORY COMPLIANCE</div>
+
+    <div class="paragraph">
+      {{STATUTORY_COMPLIANCE}}
+    </div>
+
+    <div class="section-number">14. BACKGROUND VERIFICATION</div>
+
+    <div class="paragraph">
+      {{BACKGROUND_VERIFICATION}}
+    </div>
+
+    <div class="section-number">15. NON-COMPETE AND NON-SOLICITATION</div>
+
+    <div class="paragraph">
+      {{NON_COMPETE_CLAUSE}}
+    </div>
+
+    <div class="section-number">16. GENERAL TERMS</div>
+
+    <div class="paragraph">
+      {{GENERAL_TERMS}}
+    </div>
+
+    <div class="section-number">17. NOTICE PERIOD AND SEPARATION</div>
+
+    <div class="paragraph">
+      {{NOTICE_PERIOD_CLAUSE}}
+    </div>
+
+    <div class="section-number">18. GOVERNING LAW AND JURISDICTION</div>
+
+    <div class="paragraph">
+      {{GOVERNING_LAW}}
+    </div>
+
+    <div class="footer">
+      <div class="footer-company">{{COMPANY_NAME}}</div>
+      <div class="footer-cin">{{COMPANY_CIN}}</div>
+      <div class="footer-address">{{COMPANY_ADDRESS}}</div>
+    </div>
+    <div class="page-number">Page 3 of 4</div>
+  </div>
+
+  <!-- PAGE 4 -->
+  <div class="page">
+    <div class="header">
+      <div class="logo-section">
+        {{COMPANY_LOGO}}
+        <div class="company-info">
+          <div class="company-name">{{COMPANY_NAME}}</div>
+          <div class="company-tagline">{{COMPANY_TAGLINE}}</div>
+        </div>
+      </div>
+      <div class="ref-section">
+        <div class="ref-number">Ref: {{REFERENCE_NUMBER}}</div>
+        <div class="date-section">Date: {{DOCUMENT_DATE}}</div>
+      </div>
+    </div>
+
+    <div class="section-title">ANNEXURE A - COMPENSATION STRUCTURE</div>
+
+    <div class="content-text" style="margin-bottom: 10px;">
+      <strong>Candidate Name:</strong> {{CANDIDATE_NAME}} | <strong>Position:</strong> {{DESIGNATION}}
+    </div>
+
+    <div class="table-section">
+      <table class="compensation-table">
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>Monthly (Rs.)</th>
+            <th>Annual (Rs.)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Basic Salary</td>
+            <td>{{BASIC_MONTHLY}}</td>
+            <td>{{BASIC_ANNUAL}}</td>
+          </tr>
+          <tr>
+            <td>House Rent Allowance (HRA)</td>
+            <td>{{HRA_MONTHLY}}</td>
+            <td>{{HRA_ANNUAL}}</td>
+          </tr>
+          <tr>
+            <td>Special Allowance</td>
+            <td>{{SPECIAL_ALLOWANCE_MONTHLY}}</td>
+            <td>{{SPECIAL_ALLOWANCE_ANNUAL}}</td>
+          </tr>
+          <tr class="total-row">
+            <td>Total Gross Earnings</td>
+            <td>{{TOTAL_GROSS_MONTHLY}}</td>
+            <td>{{TOTAL_GROSS_ANNUAL}}</td>
+          </tr>
+          <tr>
+            <td>Annual Performance Bonus (based on Performance Appraisal)</td>
+            <td>-</td>
+            <td>{{ANNUAL_BONUS}}</td>
+          </tr>
+          <tr class="total-row">
+            <td>Cost to Company (CTC)</td>
+            <td>-</td>
+            <td>{{TOTAL_CTC}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="notes-section">
+      <strong>Notes:</strong><br>
+      {{COMPENSATION_NOTES}}
+    </div>
+
+    <div class="acceptance-section">
+      <div class="acceptance-title">ACCEPTANCE OF OFFER</div>
+      <div class="acceptance-text">
+        I, <strong>{{CANDIDATE_NAME}}</strong>, accept this offer of employment with {{COMPANY_NAME}} for the position of {{DESIGNATION}}. I agree to join on {{JOINING_DATE}} and abide by all terms and conditions mentioned in this offer letter.
+      </div>
+      
+      <div class="acceptance-signature">
+        <div class="signature-block">
+          <div class="signature-line">
+            <div class="signature-name">{{CANDIDATE_NAME}}</div>
+            <div class="signature-title">Candidate Signature & Date</div>
+          </div>
+        </div>
+        <div class="signature-block">
+          <div class="signature-line">
+            <div class="signature-name">{{AUTHORISED_SIGNATORY}}</div>
+            <div class="signature-title">For {{COMPANY_NAME}}</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="stamp-area">
+        {{COMPANY_STAMP}}
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-company">{{COMPANY_NAME}}</div>
+      <div class="footer-cin">{{COMPANY_CIN}}</div>
+      <div class="footer-address">{{COMPANY_ADDRESS}}</div>
+    </div>
+    <div class="page-number">Page 4 of 4</div>
+  </div>
+</body>
+</html>
